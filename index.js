@@ -5,8 +5,17 @@ const app = express();
 
 const http = require('http');
 const server = http.createServer(app);
-const { Server } = require('socket.io');
-const io = new Server(server);
+const {Server} = require('socket.io')
+const cors = require('cors');
+
+app.use(cors());
+
+const io = new Server(server, {
+    cors: {
+        origin: 'http://localhost:3000',
+        methods: ['GET', 'POST', 'DELETE'],
+    },
+});
 
 // Hides the info that we are using Express from tools such as curl
 app.disable('x-powered-by');
@@ -21,21 +30,12 @@ app.get('/', (req,res) => res.send('API Running'));
 const SOCKET_PORT = process.env.SOCKET_PORT || 5001;
 
 io.on('connection', (socket) => {
-    console.log('a user connected');
+    console.log(`user ${socket.id} connected`);
     socket.on('disconnect', () => {
-        console.log('a user disconnected');
-    });
-
-    socket.on('chat_msg', (msg) => {
-        console.log(`chat message: ${msg.message}`);
-        /* 
-        io.emit('chat_msg', {
-            message: msg.message,
-            from: msg.sender,
-        });
-        */
+        console.log(`user ${socket.id} disconnected`);
     });
 });
+require('./socket/chatMsg')(io);
 
 server.listen(SOCKET_PORT, () => {
     console.log(`Socket server listening on port ${SOCKET_PORT}`);
@@ -48,12 +48,3 @@ app.use('/api/users', require('./routes/users'));
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => console.log(`Server started on port ${PORT}`));
-
-module.exports = {
-    socketEmit: (name, content, silent = false) => {
-        if (!silent) {
-            console.log(`Emitting ${name} - message: ${JSON.stringify(content)}`);
-        }
-        io.emit(name,content);
-    },
-};
