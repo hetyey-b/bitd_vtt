@@ -36,6 +36,7 @@ io.on('connection', (socket) => {
     });
 });
 require('./socket/chatMsg')(io);
+require('./socket/dice')(io);
 
 server.listen(SOCKET_PORT, () => {
     console.log(`Socket server listening on port ${SOCKET_PORT}`);

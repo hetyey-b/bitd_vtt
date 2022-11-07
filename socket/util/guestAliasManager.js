@@ -1,4 +1,23 @@
+guestAliases = {};
+
 module.exports = {
+    getAlias: (socketId) => {
+        if (guestAliases[socketId]) {
+            return guestAliases[socketId];
+        }
+        
+        const adjective = data.adjectives[Math.floor(Math.random() * data.adjectives.length)];
+        const animal = data.animals[Math.floor(Math.random() * data.animals.length)];
+        guestAliases[socketId] = `${adjective} ${animal}`;
+
+        return guestAliases[socketId];
+    },
+    deleteAlias: (socketId) => {
+        delete guestAliases[socketId];
+    }
+};
+
+const data = {
     adjectives: [
         'Upset',
         'Flowery',
