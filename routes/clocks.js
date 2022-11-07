@@ -2,8 +2,14 @@ const express = require('express');
 const router = express.Router();
 const { check, validationResult } = require('express-validator');
 const auth = require('../middleware/auth');
+const socketEmit = requre('../index');
 
 const Clock = require('../models/Clock');
+
+const emitAllClocks = async () => {
+    let clocks = await Clock.find();
+    socketEmit('clocks', clocks);
+}
 
 // @route   POST api/clocks
 // @desc    Create/Update a clock
@@ -39,6 +45,8 @@ router.post(
                     { new: true }
                 );
                 
+                await emitAllClocks();
+
                 return res.json(clock);
             }
 
@@ -46,6 +54,8 @@ router.post(
 
             await clock.save();
 
+            await emitAllClocks();
+            
             return res.json(clock);
         } catch (err) {
             console.error(err);
